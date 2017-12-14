@@ -1,0 +1,48 @@
+Take Notes
+•	clear all
+•	set more off
+•	order xx, before (xx)
+•	des – describe the data
+•	drop if mi(xx) – drop missing data
+•	destring xx, gen (yy)
+•	drop if xx<1000 & xx>500
+•	gen X1 = A/B
+•	label variable X1 “label name” 改标签名
+•	br – take a look at the data 看数据
+•	rename Prcc_yearly price 重命名
+•	by id: gen return=price/price[_n-1]-1 算回报率
+•	sum Z_score, detail 对某组数据总结
+•	egen countrynum = group (id) 重新编号
+•	format Z_score %9.5fc 确认保留小数点后五位
+•	处理outliers：
+quietly sum BTM, de
+gen wins = BTM
+replace wins = r(p1) if BTM <= r(p1)
+replace wins = r(p99) if BTM >= r(p99)
+format wins %9.5fc
+
+•	制作descriptive statistics table 
+tabstat return Z log_MV BM, stat(mean sd p5 p25 p50 p75 p95) col (stat) format (%9.3f)
+•	 _pctile Z, p(31.5, 32, 32.5)  查百分位数
+•	制作高质量table
+estpost sum RETURN Z log_MV BM, de
+esttab, cell((mean(fmt(%9.3f)) sd(fmt(%9.3f)) p5(fmt(%9.3f))p25(fmt(%9.3f)) p50(fmt(%9.3f)) p75(fmt(%9.3f)) p95(fmt(%9.3f)))) nonumber nomtitle noobs
+做portfolio
+pctile pct = Z, nq(10)
+list pct in 1/10
+recode Z (min/1.17022=1)(1.17023/0.9699766=2)(0.9699767/1.732183=3)(1.732184/2.238462=4)(2.238463/3.036557=5)(3.036558/3.781365=6)(3.781366/4.797727=7)(4.797728/6.437157=8)(6.437158/10.90557=9)(10.90558/max=10),gen(portfolio)
+
+•	tabulate year频率表格
+•	estpost tabstat Z RETURN log_MV BM, by(year)   根据某个分类来总结
+•	部分数据做regression
+qui reg RETURN Z log_MV BM if year==2003  
+esttab m1 m2 m3 m4, nonumber nomtitle noobs
+•	egen dimension2=cut(BM) if dimension1==0, group(2)  分组
+•	panel data regression:
+duplicates report
+duplicates list id year
+duplicates drop id year, force
+xtset id year
+
+
+
